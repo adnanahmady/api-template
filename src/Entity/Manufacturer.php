@@ -3,11 +3,20 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata as Api;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Api\GetCollection(),
+        new Api\Get(),
+        new Api\Post(),
+        new Api\Put(),
+        new Api\Patch(),
+    ]
+)]
 #[ORM\Entity]
 class Manufacturer
 {
