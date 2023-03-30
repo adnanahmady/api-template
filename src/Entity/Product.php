@@ -3,17 +3,19 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ApiResource]
 #[ORM\Entity]
-class Manufacturer
+class Product
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: "integer")]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
+
+    #[ORM\Column]
+    private ?string $mpn = null;
 
     #[ORM\Column]
     private string $name = '';
@@ -21,23 +23,14 @@ class Manufacturer
     #[ORM\Column(type: 'text')]
     private string $description = '';
 
-    #[ORM\Column(length: 3)]
-    private string $countryCode = '';
-
     #[ORM\Column(type: 'datetime')]
-    private ?\DateTimeInterface $listedDate = null;
+    private ?\DateTimeInterface $issueDate = null;
 
-    #[ORM\OneToMany(
-        mappedBy: 'manufacturer',
-        targetEntity: Product::class,
-        cascade: ['persist', 'remove']
+    #[ORM\ManyToOne(
+        targetEntity: Manufacturer::class,
+        inversedBy: 'products'
     )]
-    private iterable $products;
-
-    public function __construct()
-    {
-        $this->products = new ArrayCollection();
-    }
+    private ?Manufacturer $manufacturer = null;
 
     /**
      * @return int|null
@@ -45,6 +38,22 @@ class Manufacturer
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getMpn(): ?string
+    {
+        return $this->mpn;
+    }
+
+    /**
+     * @param string|null $mpn
+     */
+    public function setMpn(?string $mpn): void
+    {
+        $this->mpn = $mpn;
     }
 
     /**
@@ -80,39 +89,34 @@ class Manufacturer
     }
 
     /**
-     * @return string
-     */
-    public function getCountryCode(): string
-    {
-        return $this->countryCode;
-    }
-
-    /**
-     * @param string $countryCode
-     */
-    public function setCountryCode(string $countryCode): void
-    {
-        $this->countryCode = $countryCode;
-    }
-
-    /**
      * @return \DateTimeInterface|null
      */
-    public function getListedDate(): ?\DateTimeInterface
+    public function getIssueDate(): ?\DateTimeInterface
     {
-        return $this->listedDate;
+        return $this->issueDate;
     }
 
     /**
-     * @param \DateTimeInterface|null $listedDate
+     * @param \DateTimeInterface|null $issueDate
      */
-    public function setListedDate(?\DateTimeInterface $listedDate): void
+    public function setIssueDate(?\DateTimeInterface $issueDate): void
     {
-        $this->listedDate = $listedDate;
+        $this->issueDate = $issueDate;
     }
 
-    public function getProducts(): iterable|ArrayCollection
+    /**
+     * @return Manufacturer|null
+     */
+    public function getManufacturer(): ?Manufacturer
     {
-        return $this->products;
+        return $this->manufacturer;
+    }
+
+    /**
+     * @param Manufacturer|null $manufacturer
+     */
+    public function setManufacturer(?Manufacturer $manufacturer): void
+    {
+        $this->manufacturer = $manufacturer;
     }
 }
