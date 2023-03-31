@@ -15,7 +15,9 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Api\Post(),
         new Api\Put(),
         new Api\Patch(),
-    ]
+    ],
+    paginationClientItemsPerPage: true,
+    paginationItemsPerPage: 10,
 )]
 #[ORM\Entity]
 class Manufacturer
