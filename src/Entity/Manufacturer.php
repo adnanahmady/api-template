@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata as Api;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ApiResource(
@@ -15,6 +16,9 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Api\Post(),
         new Api\Put(),
         new Api\Patch(),
+    ],
+    normalizationContext: [
+        'groups' => ['read']
     ],
     paginationClientItemsPerPage: true,
     paginationItemsPerPage: 10,
@@ -29,6 +33,7 @@ class Manufacturer
 
     #[ORM\Column]
     #[Assert\NotBlank]
+    #[Groups(['read'])]
     private string $name = '';
 
     #[ORM\Column(type: 'text')]

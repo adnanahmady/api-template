@@ -9,11 +9,19 @@ use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 #[
-    ApiResource,
+    ApiResource(
+        normalizationContext: [
+            'groups' => ['product.read']
+        ],
+        denormalizationContext: [
+            'groups' => ['product.write']
+        ]
+    ),
     ApiFilter(
     filterClass: SearchFilter::class,
     properties: [
@@ -38,24 +46,29 @@ class Product
 
     #[ORM\Column]
     #[Assert\NotNull]
+    #[Groups(['product.read', 'product.write'])]
     private ?string $mpn = null;
 
     #[ORM\Column]
     #[Assert\NotBlank]
+    #[Groups(['product.read', 'product.write'])]
     private string $name = '';
 
     #[ORM\Column(type: 'text')]
     #[Assert\NotBlank]
+    #[Groups(['product.read', 'product.write'])]
     private string $description = '';
 
     #[ORM\Column(type: 'datetime')]
     #[Assert\NotNull]
+    #[Groups(['product.read'])]
     private ?\DateTimeInterface $issueDate = null;
 
     #[ORM\ManyToOne(
         targetEntity: Manufacturer::class,
         inversedBy: 'products'
     )]
+    #[Groups(['product.read'])]
     private ?Manufacturer $manufacturer = null;
 
     /**
