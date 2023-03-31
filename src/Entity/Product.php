@@ -2,12 +2,33 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Common\Filter\OrderFilterInterface;
+use ApiPlatform\Doctrine\Common\Filter\SearchFilterInterface;
+use ApiPlatform\Doctrine\Odm\Filter\OrderFilter;
+use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ApiResource]
 #[ORM\Entity]
+#[
+    ApiResource,
+    ApiFilter(
+    filterClass: SearchFilter::class,
+    properties: [
+        'name' => SearchFilterInterface::STRATEGY_PARTIAL,
+        'description' => SearchFilterInterface::STRATEGY_PARTIAL,
+        'manufacturer.countryCode' => SearchFilterInterface::STRATEGY_EXACT,
+    ]
+),
+    ApiFilter(
+        filterClass: OrderFilter::class,
+        properties: [
+            'issueDate' => OrderFilterInterface::DIRECTION_ASC
+        ]
+    )
+]
 class Product
 {
     #[ORM\Id]
