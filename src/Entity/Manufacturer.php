@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata as Api;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Link;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -23,6 +25,18 @@ use Symfony\Component\Validator\Constraints as Assert;
     paginationClientItemsPerPage: true,
     paginationItemsPerPage: 10,
 )]
+#[
+    ApiResource(
+        uriTemplate: '/api/manufacturers/{id}/products',
+        operations: [new Api\GetCollection()],
+        uriVariables: [
+            'id' => new Link(
+                fromProperty: 'manufacturer',
+                fromClass: Product::class,
+            )
+        ]
+    ),
+]
 #[ORM\Entity]
 class Manufacturer
 {

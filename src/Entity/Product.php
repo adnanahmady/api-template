@@ -8,6 +8,8 @@ use ApiPlatform\Doctrine\Odm\Filter\OrderFilter;
 use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Link;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -20,16 +22,28 @@ use Symfony\Component\Validator\Constraints as Assert;
         ],
         denormalizationContext: [
             'groups' => ['product.write']
+        ],
+        paginationItemsPerPage: 5
+    ),
+    ApiResource(
+        uriTemplate: '/api/products/{id}/manufacturer',
+        operations: [new Get()],
+        uriVariables: [
+            'id' => new Link(
+                fromProperty: 'products',
+                fromClass: Manufacturer::class,
+            )
         ]
     ),
     ApiFilter(
-    filterClass: SearchFilter::class,
-    properties: [
-        'name' => SearchFilterInterface::STRATEGY_PARTIAL,
-        'description' => SearchFilterInterface::STRATEGY_PARTIAL,
-        'manufacturer.countryCode' => SearchFilterInterface::STRATEGY_EXACT,
-    ]
-),
+        filterClass: SearchFilter::class,
+        properties: [
+            'name' => SearchFilterInterface::STRATEGY_PARTIAL,
+            'description' => SearchFilterInterface::STRATEGY_PARTIAL,
+            'manufacturer.countryCode' => SearchFilterInterface::STRATEGY_EXACT,
+            'manufacturer.id' => SearchFilterInterface::STRATEGY_EXACT,
+        ]
+    ),
     ApiFilter(
         filterClass: OrderFilter::class,
         properties: [
@@ -61,14 +75,15 @@ class Product
 
     #[ORM\Column(type: 'datetime')]
     #[Assert\NotNull]
-    #[Groups(['product.read'])]
+    #[Groups(['product.read', 'product.write'])]
     private ?\DateTimeInterface $issueDate = null;
 
     #[ORM\ManyToOne(
         targetEntity: Manufacturer::class,
         inversedBy: 'products'
     )]
-    #[Groups(['product.read'])]
+    #[Groups(['product.read', 'product.write'])]
+    #[Assert\NotNull]
     private ?Manufacturer $manufacturer = null;
 
     /**

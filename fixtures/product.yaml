@@ -1,0 +1,9 @@
+# api/fixtures/product.yaml
+
+App\Entity\Product:
+  product_{1..100}:
+    mpn: <isbn10()>
+    name: <catchPhrase()>
+    description: <sentence()>
+    issueDate: <datetime()>
+    manufacturer: '@manufacturer_*'
