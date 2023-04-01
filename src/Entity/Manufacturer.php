@@ -7,6 +7,8 @@ use ApiPlatform\Metadata as Api;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Link;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -149,5 +151,27 @@ class Manufacturer
     public function getProducts(): iterable|ArrayCollection
     {
         return $this->products;
+    }
+
+    public function addProduct(Product $product): self
+    {
+        if (!$this->products->contains($product)) {
+            $this->products->add($product);
+            $product->setManufacturer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduct(Product $product): self
+    {
+        if ($this->products->removeElement($product)) {
+            // set the owning side to null (unless already changed)
+            if ($product->getManufacturer() === $this) {
+                $product->setManufacturer(null);
+            }
+        }
+
+        return $this;
     }
 }
