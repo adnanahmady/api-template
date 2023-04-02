@@ -5,19 +5,24 @@ namespace App\Tests\Feature\Product;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Entity\Manufacturer;
 use App\Repository\ManufacturerRepository;
+use App\Tests\Traits\CreateClientWithTokenTrait;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
 use Symfony\Component\HttpFoundation\Response;
 
 class CreateTest extends ApiTestCase
 {
     use RefreshDatabaseTrait;
+    use CreateClientWithTokenTrait;
 
     public function testItCanNotBeCreatedUsingInvalidData(): void
     {
-        $response = static::createClient()->request(
+        $this->createClientWith(
+            $token = bin2hex(random_bytes(60))
+        )->request(
             'POST',
             '/api/products',
             [
+                'headers' => ['x-api-token' => $token],
                 'json' => [
                     'mpn' => '1234',
                     'name' => 'A test product',
@@ -25,7 +30,7 @@ class CreateTest extends ApiTestCase
                     'issueDate' => '1985-07-31',
                     'manufacturer' => null,
                 ]
-            ]
+            ],
         );
 
         $this->assertResponseIsUnprocessable();
@@ -43,10 +48,13 @@ class CreateTest extends ApiTestCase
 
     public function testUserCanCreateAProduct(): void
     {
-        static::createClient()->request(
+        $this->createClientWith(
+            $token = bin2hex(random_bytes(60))
+        )->request(
             'POST',
             '/api/products',
             [
+                'headers' => ['x-api-token' => $token],
                 'json' => [
                     'mpn' => '1234',
                     'name' => 'A test product',

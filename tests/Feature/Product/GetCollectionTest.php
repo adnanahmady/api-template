@@ -3,21 +3,24 @@
 namespace App\Tests\Feature\Product;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
+use App\Tests\Traits\CreateClientWithTokenTrait;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
 
 class GetCollectionTest extends ApiTestCase
 {
     use RefreshDatabaseTrait;
+    use CreateClientWithTokenTrait;
 
     public function testUserCanSetThePageOfData(): void
     {
-        static::createClient()->request(
+        $this->createClientWith(
+            $token = bin2hex(random_bytes(60))
+        )->request(
             'GET',
             '/api/products',
             [
-                'query' => [
-                    'page' => 3
-                ]
+                'query' => ['page' => 3],
+                'headers' => ['x-api-token' => $token],
             ]
         );
 
@@ -35,9 +38,12 @@ class GetCollectionTest extends ApiTestCase
 
     public function testDefaultNumberOfMembersShouldExistInEachPage(): void
     {
-        $response = static::createClient()->request(
+        $response = $this->createClientWith(
+            $token = bin2hex(random_bytes(60))
+        )->request(
             'GET',
-            '/api/products'
+            '/api/products',
+            ['headers' => ['x-api-token' => $token]],
         );
 
         $this->assertCount(
@@ -48,9 +54,12 @@ class GetCollectionTest extends ApiTestCase
 
     public function testUserCanGetACollectionOfProducts(): void
     {
-        static::createClient()->request(
+        $this->createClientWith(
+            $token = bin2hex(random_bytes(60))
+        )->request(
             'GET',
-            '/api/products'
+            '/api/products',
+            ['headers' => ['x-api-token' => $token]],
         );
 
         $this->assertResponseIsSuccessful();

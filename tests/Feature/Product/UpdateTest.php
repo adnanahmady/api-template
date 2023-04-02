@@ -7,27 +7,29 @@ use App\Entity\Manufacturer;
 use App\Entity\Product;
 use App\Repository\ManufacturerRepository;
 use App\Repository\ProductRepository;
+use App\Tests\Traits\CreateClientWithTokenTrait;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
 use Symfony\Component\HttpFoundation\Response;
 
 class UpdateTest extends ApiTestCase
 {
     use RefreshDatabaseTrait;
+    use CreateClientWithTokenTrait;
 
     public function testItCanBeUpdated(): void
     {
         $id = $this->getFirstProduct()->getId();
 
-        static::createClient()->request(
+        $this->createClientWith(
+            $token = bin2hex(random_bytes(60))
+        )->request(
             'PUT',
-            sprintf(
-                '/api/products/%d',
-                $id
-            ),
+            "/api/products/$id",
             [
                 'json' => [
                     'description' => 'An updated description',
-                ]
+                ],
+                'headers' => ['x-api-token' => $token],
             ]
         );
 
@@ -35,6 +37,29 @@ class UpdateTest extends ApiTestCase
         $this->assertJsonContains([
             '@id' => '/api/products/' . $id,
             'description' => 'An updated description',
+        ]);
+    }
+
+    public function testItCanNotBeUpdatedByOfferingWrongApiToken(): void
+    {
+        $id = $this->getFirstProduct()->getId();
+
+        $this->createClient()->request(
+            'PUT',
+            "/api/products/$id",
+            [
+                'json' => [
+                    'description' => 'An updated description',
+                ],
+                'headers' => ['x-api-token' => 'fake-token'],
+            ]
+        );
+
+        $this->assertResponseStatusCodeSame(
+            Response::HTTP_UNAUTHORIZED
+        );
+        $this->assertJsonContains([
+            'message' => 'Invalid credentials.',
         ]);
     }
 
