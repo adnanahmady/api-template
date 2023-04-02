@@ -8,8 +8,13 @@ use ApiPlatform\Doctrine\Odm\Filter\OrderFilter;
 use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -18,6 +23,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity]
 #[
     ApiResource(
+        operations: [
+            new GetCollection(security: 'is_granted("ROLE_USER")'),
+            new Post(security: 'is_granted("ROLE_ADMIN")'),
+            new Put(security: 'is_granted("ROLE_USER") and object.getOwner() == user'),
+            new Patch(security: 'is_granted("ROLE_USER")'),
+            new Delete(security: 'is_granted("ROLE_USER")'),
+        ],
         normalizationContext: [
             'groups' => ['product.read']
         ],
@@ -28,7 +40,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     ),
     ApiResource(
         uriTemplate: '/api/products/{id}/manufacturer',
-        operations: [new Get()],
+        operations: [new Get(security: 'is_granted("ROLE_USER")')],
         uriVariables: [
             'id' => new Link(
                 fromProperty: 'products',
@@ -86,6 +98,10 @@ class Product
     #[Groups(['product.read', 'product.write'])]
     #[Assert\NotNull]
     private ?Manufacturer $manufacturer = null;
+
+    #[ORM\ManyToOne(cascade: ['persist', 'remove'], inversedBy: 'products')]
+    #[Groups(['product.read', 'product.write'])]
+    private ?User $owner = null;
 
     /**
      * @return int|null
@@ -173,5 +189,17 @@ class Product
     public function setManufacturer(?Manufacturer $manufacturer): void
     {
         $this->manufacturer = $manufacturer;
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): self
+    {
+        $this->owner = $owner;
+
+        return $this;
     }
 }

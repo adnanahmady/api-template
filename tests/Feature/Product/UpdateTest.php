@@ -18,6 +18,10 @@ class UpdateTest extends ApiTestCase
 
     public function testItCanBeUpdated(): void
     {
+        $this->client = $this->createClient();
+        $this->user = $this->addUser(
+            roles: ['ROLE_USER']
+        );
         $id = $this->getFirstProduct()->getId();
 
         $this->createClientWith(
@@ -65,8 +69,16 @@ class UpdateTest extends ApiTestCase
 
     private function getFirstProduct(): Product
     {
-        return $this->getContainer()
-            ->get(ProductRepository::class)
+        $product = $this->getProductRepository()
             ->findOneBy([], orderBy: ['id' => 'ASC']);
+        $product->setOwner($this->user);
+
+        return $product;
+    }
+
+    private function getProductRepository(): ProductRepository
+    {
+        return $this->getContainer()
+            ->get(ProductRepository::class);
     }
 }

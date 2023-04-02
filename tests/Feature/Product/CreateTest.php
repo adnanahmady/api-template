@@ -16,7 +16,7 @@ class CreateTest extends ApiTestCase
 
     public function testItCanNotBeCreatedUsingInvalidData(): void
     {
-        $this->createClientWith(
+        $this->createClientForAdminWith(
             $token = bin2hex(random_bytes(60))
         )->request(
             'POST',
@@ -48,7 +48,7 @@ class CreateTest extends ApiTestCase
 
     public function testUserCanCreateAProduct(): void
     {
-        $this->createClientWith(
+        $this->createClientForAdminWith(
             $token = bin2hex(random_bytes(60))
         )->request(
             'POST',

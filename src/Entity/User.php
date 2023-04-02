@@ -33,9 +33,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'tokenOwner', targetEntity: ApiToken::class, orphanRemoval: true)]
     private Collection $apiTokens;
 
+    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Product::class)]
+    private Collection $products;
+
     public function __construct()
     {
         $this->apiTokens = new ArrayCollection();
+        $this->products = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -132,6 +136,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($apiToken->getTokenOwner() === $this) {
                 $apiToken->setTokenOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Product>
+     */
+    public function getProducts(): Collection
+    {
+        return $this->products;
+    }
+
+    public function addProduct(Product $product): self
+    {
+        if (!$this->products->contains($product)) {
+            $this->products->add($product);
+            $product->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduct(Product $product): self
+    {
+        if ($this->products->removeElement($product)) {
+            // set the owning side to null (unless already changed)
+            if ($product->getOwner() === $this) {
+                $product->setOwner(null);
             }
         }
 
